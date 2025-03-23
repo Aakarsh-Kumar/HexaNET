@@ -26,7 +26,7 @@ const Dashboard = () => {
   
   const fetchDashboardData = async () => {
     try {
-      const dashboardResponse = await axios.get('http://127.0.0.1:5000/api/dashboard');
+      const dashboardResponse = await axios.get('https://4235-103-4-221-252.ngrok-free.app/api/dashboard');
       console.log(dashboardResponse);
       setNetworkData(dashboardResponse.data);
     } catch (error) {

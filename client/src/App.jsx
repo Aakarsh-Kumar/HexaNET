@@ -2,6 +2,8 @@ import React from 'react';
 import Dashboard from './components/Dashboard';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+//import Alerts from './components/Alerts';
+import ThreatMap from './components/ThreatMap';
 import './App.css';
 
 function App() {

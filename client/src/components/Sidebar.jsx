@@ -4,7 +4,6 @@ import { Shield, Wifi, AlertTriangle, Settings, FileText, Home } from 'lucide-re
 const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', icon: <Home size={20} /> },
-    { name: 'Network Traffic', icon: <Wifi size={20} /> },
     { name: 'Threats', icon: <Shield size={20} /> },
     { name: 'Alerts', icon: <AlertTriangle size={20} /> },
     { name: 'Reports', icon: <FileText size={20} /> },

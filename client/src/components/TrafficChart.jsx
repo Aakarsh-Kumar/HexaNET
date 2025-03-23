@@ -46,7 +46,7 @@ const TrafficChart = ({ data }) => {
         ))}
       </LineChart>
       
-      <div className="mt-4 text-sm text-gray-500">
+      <div className="mt-1 text-sm text-gray-500">
         <div className="flex items-center justify-between">
           <div>Last updated: {new Date().toLocaleTimeString()}</div>
           <div className="flex items-center">
@@ -54,10 +54,8 @@ const TrafficChart = ({ data }) => {
               Live
             </button>
             <button className="ml-2 px-3 py-1 text-gray-600 rounded hover:bg-gray-100">
-              24h
             </button>
             <button className="ml-2 px-3 py-1 text-gray-600 rounded hover:bg-gray-100">
-              7d
             </button>
           </div>
         </div>

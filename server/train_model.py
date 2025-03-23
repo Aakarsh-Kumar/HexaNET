@@ -1,17 +1,23 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.ensemble import IsolationForest
+from sklearn.model_selection import train_test_split
 
-# Load dataset
-df = pd.read_csv("./server/raw_data.csv")
+# Load preprocessed data
+train_df = pd.read_pickle("train_df_processed.pkl")
 
-features = ['packet_size', 'protocol', 'source_port', 'destination_port']
-X = df[features]
-y = df['label']  
+# Define features (X) and target (y)
+X = train_df.drop(columns=["label"])
+y = train_df["label"]
 
-encoder = LabelEncoder()
-y_encoded = encoder.fit_transform(y)
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# Initialize and train the Isolation Forest model
+iso_forest = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
+iso_forest.fit(X_train)
 
-pd.DataFrame(X_scaled, columns=features).to_csv("./server/raw_data.csv", index=False)
+# Save trained model
+import joblib
+joblib.dump(iso_forest, "isolation_forest.pkl")
+
+print("✅ Model Training Completed and Saved")

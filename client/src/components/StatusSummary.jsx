@@ -34,7 +34,7 @@ const StatusSummary = ({ data }) => {
         </div>
         <div className="ml-4">
           <p className="text-sm font-medium text-gray-500">Total Traffic</p>
-          <p className="text-2xl font-semibold">{data.totalTraffic} Mbps</p>
+          <p className="text-2xl font-semibold">{((data.totalTraffic)/1024).toFixed(2)} Mbps </p>
         </div>
       </div>
       
