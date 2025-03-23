@@ -22,7 +22,6 @@ with open("isolation_forest_model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
 ATTACK_TYPES = ["DDoS", "Phishing", "Malware"]
-import random
 def capture_live_traffic():
     packets = scapy.sniff(timeout=1)
     print(f"Captured {len(packets)} packets")
@@ -36,9 +35,8 @@ def capture_live_traffic():
         flag = "SYN" if pkt.haslayer(scapy.TCP) and pkt[scapy.TCP].flags == 2 else "other"
         src_bytes = pkt[scapy.IP].len if pkt.haslayer(scapy.IP) else 0
         
-        difficulty = random.choice(["low", "medium", "high"])
         print(f"packet_length: {packet_length}, protocol: {protocol}, service: {service}, flag: {flag}, src_bytes: {src_bytes}, difficulty: {difficulty}")
-        traffic_data.append([packet_length, protocol, service, flag, src_bytes, difficulty])
+        traffic_data.append([packet_length, protocol, service, flag, src_bytes])
 
     return traffic_data
 
@@ -68,15 +66,16 @@ def predict_threats(live_data):
     print(f"Predictions: {predictions}")
     for i, pred in enumerate(predictions):
         if pred == -1:  
-            attack_type = random.choice(ATTACK_TYPES)
+            attack_type = ATTACK_TYPES[pred % len(ATTACK_TYPES)] if pred == -1 else "None"
             threats.append({
                 "id": str(i),
+                "prediction": "Anomalous" if pred == -1 else "Normal",
                 "type": attack_type,
-                "source": f"192.168.1.{random.randint(1, 255)}",
+                "source": "192.168.1.1", 
                 "firstDetected": datetime.now().isoformat(),
-                "status": random.choice(["Active", "Mitigated", "Investigating"]),
-                "confidence": f"{random.randint(70, 99)}%",
-                "impact": random.choice(["Low", "Moderate", "Severe"]),
+                "status": "Active" if pred == -1 else "Normal",
+                "confidence": "90%" if pred == -1 else "100%",
+                "impact": "Severe" if pred == -1 else "None",
                 "src_bytes": live_data[i][4]
             })
     return threats
@@ -110,7 +109,6 @@ def get_dashboard():
             "labels": [f"Connection {i}" for i in range(1, 6)],
             "datasets": [{
                 "label": "Network Traffic",
-                "data": [random.randint(500, 2000) for _ in range(5)],
                 "borderColor": "#36A2EB",
                 "backgroundColor": "rgba(54, 162, 235, 0.2)"
             }]
