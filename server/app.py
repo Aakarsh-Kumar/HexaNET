@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
-import random
+
 import pickle
 import scapy.all as scapy
 import numpy as np
@@ -21,10 +21,12 @@ with open("pca.pkl", "rb") as pca_file:
 with open("isolation_forest_model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
-ATTACK_TYPES = ["DDoS", "SQL Injection", "Brute Force", "Phishing", "Malware"]
-
+ATTACK_TYPES = ["DDoS", "Phishing", "Malware"]
+import random
 def capture_live_traffic():
-    packets = scapy.sniff(timeout=10)
+    packets = scapy.sniff(timeout=1)
+    print(f"Captured {len(packets)} packets")
+    print(f"Captured {packets} ")
     traffic_data = []
 
     for pkt in packets:
@@ -33,8 +35,9 @@ def capture_live_traffic():
         service = str(pkt[scapy.IP].proto) if pkt.haslayer(scapy.IP) else "unknown"
         flag = "SYN" if pkt.haslayer(scapy.TCP) and pkt[scapy.TCP].flags == 2 else "other"
         src_bytes = pkt[scapy.IP].len if pkt.haslayer(scapy.IP) else 0
+        
         difficulty = random.choice(["low", "medium", "high"])
-
+        print(f"packet_length: {packet_length}, protocol: {protocol}, service: {service}, flag: {flag}, src_bytes: {src_bytes}, difficulty: {difficulty}")
         traffic_data.append([packet_length, protocol, service, flag, src_bytes, difficulty])
 
     return traffic_data
@@ -52,7 +55,6 @@ def predict_threats(live_data):
 
     flag_mapping = {"SYN": 1, "other": 0}
     live_df["flag"] = live_df["flag"].map(flag_mapping)
-
     difficulty_mapping = {"low": 0, "medium": 1, "high": 2}
     live_df["difficulty"] = live_df["difficulty"].map(difficulty_mapping)
 
@@ -63,7 +65,7 @@ def predict_threats(live_data):
 
     predictions = model.predict(live_data_pca)
     threats = []
-
+    print(f"Predictions: {predictions}")
     for i, pred in enumerate(predictions):
         if pred == -1:  
             attack_type = random.choice(ATTACK_TYPES)
@@ -74,21 +76,24 @@ def predict_threats(live_data):
                 "firstDetected": datetime.now().isoformat(),
                 "status": random.choice(["Active", "Mitigated", "Investigating"]),
                 "confidence": f"{random.randint(70, 99)}%",
-                "impact": random.choice(["Low", "Moderate", "Severe"])
+                "impact": random.choice(["Low", "Moderate", "Severe"]),
+                "src_bytes": live_data[i][4]
             })
-
     return threats
+    
 
 def generate_summary(threats):
+    total_traffic = sum(t["src_bytes"] for t in threats)
+    print(threats)
     return {
-        "totalTraffic": random.randint(5000, 20000),
-        "activeThreats": len(threats),
+        "totalTraffic": total_traffic,
+        "activeThreats": round(len(threats)/10,0),
         "criticalAlerts": sum(1 for t in threats if t["impact"] == "Severe"),
-        "systemStatus": "Critical" if len(threats) > 3 else "Stable"
+        "systemStatus": "Critical" if sum(1 for t in threats if t["impact"] == "Severe") > 4 else "Stable"
     }
 
 def send_alert(email, message):
-    yag = yagmail.SMTP("your_email@gmail.com", "your_app_password")
+    yag = yagmail.SMTP("kushagragoel75@gmail.com", "smes rtip hbdb ncwh")
     yag.send(email, "Security Alert", message)
     print("Alert Sent Successfully")
 
@@ -102,7 +107,7 @@ def get_dashboard():
     summary = generate_summary(threats)
     return jsonify({
         "traffic": {
-            "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "labels": [f"Connection {i}" for i in range(1, 6)],
             "datasets": [{
                 "label": "Network Traffic",
                 "data": [random.randint(500, 2000) for _ in range(5)],
